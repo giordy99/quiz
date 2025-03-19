@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Quale razza di gallina sei?</title>
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            text-align: center; 
+            background-color: #f5e6cc; /* Beige */
+            color: #5a3d2b; /* Marrone scuro */
+            margin: 0; 
+            padding: 20px;
+        }
+        .logo { 
+            max-width: 150px; 
+            margin: 20px auto; 
+            display: block;
+        }
+        .question { 
+            margin-bottom: 20px; 
+            font-size: 18px;
+        }
+        .options button { 
+            display: block; 
+            width: 50%; 
+            margin: 8px auto; 
+            padding: 12px; 
+            cursor: pointer; 
+            background-color: #d2a679; /* Marrone chiaro */
+            color: white; 
+            border: none; 
+            border-radius: 15px;
+            font-size: 16px;
+        }
+        .options button:hover {
+            background-color: #b98b5d;
+        }
+        .selected { 
+            background-color: #8c6239 !important; 
+        }
+        .result-container { 
+            margin-top: 50px; 
+        }
+        img { 
+            max-width: 100%; 
+            height: auto; 
+            margin-top: 20px; 
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <img src="C:\Users\valec\Desktop\quiz\logo.jpg" alt="Logo Ca' Rogiolo" class="logo">
+    <h1>Quale razza di gallina sei?</h1>
+    <div id="quiz"></div>
+    <div id="result" style="display: none;">
+        <h2 id="result-text"></h2>
+        <img id="result-image" src="" alt="Immagine della gallina">
+        <p id="result-description"></p>
+    </div>
+
+    <script>
+        const questions = [
+            { text: "Qual è il tuo habitat ideale?", options: { A: "Un luogo tranquillo e appartato, lontano dalla confusione", B: "Un ambiente stimolante e pieno di novità", C: "Un posto accogliente e familiare, dove mi sento a mio agio", D: "Un ambiente raffinato ed elegante, perfetto per distinguermi", E: "Ovunque, basta che possa muovermi liberamente", F: "Un posto che posso controllare, dove mi sento sicuro" } },
+            { text: "Come affronti le nuove sfide?", options: { A: "Con determinazione e senza esitazioni", B: "Analizzo bene la situazione prima di agire", C: "Con creatività, trovando soluzioni alternative", D: "Mi affido alla mia esperienza e al mio intuito", E: "Con entusiasmo, senza paura di buttarmi", F: "Evito il rischio e cerco strategie per aggirare l’ostacolo" } },
+            { text: "Qual è la tua idea di una giornata perfetta?", options: { A: "Un momento di pace per rilassarmi in solitudine", B: "Un’avventura alla scoperta di qualcosa di nuovo", C: "Trascorrere del tempo con amici e famiglia", D: "Partecipare a un evento esclusivo e raffinato", E: "Un giorno pieno di azione e movimento", F: "Un mix di sfide e momenti di controllo" } },
+            { text: "Come ti descriverebbero gli altri?", options: { A: "Misterioso e riservato", B: "Curioso e sempre alla ricerca di novità", C: "Affettuoso e leale", D: "Elegante e di classe", E: "Energico e instancabile", F: "Determinato e sicuro di sé" } },
+            { text: "Cosa ti motiva di più nella vita?", options: { A: "L’indipendenza e l’autosufficienza", B: "La voglia di esplorare e imparare sempre qualcosa di nuovo", C: "Il legame con le persone a cui voglio bene", D: "Il desiderio di lasciare un segno e distinguermi", E: "Il bisogno di sentirmi sempre in movimento", F: "Il controllo della mia vita e delle situazioni" } },
+            { text: "Qual è il tuo stile personale?", options: { A: "Sobrio ma affascinante", B: "Casual e comodo, pronto per nuove avventure", C: "Accogliente e rassicurante", D: "Ricercato e inconfondibile", E: "Sportivo e dinamico", F: "Elegante ma senza ostentare" } },
+            { text: "Se fossi un colore, quale saresti?", options: { A: "Nero, enigmatico e carismatico", B: "Verde, naturale e curioso", C: "Rosso, caloroso e affettuoso", D: "Oro, raffinato e splendente", E: "Blu, profondo e avventuroso", F: "Bianco, puro e imponente" } }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        const quizDiv = document.getElementById("quiz");
+        const resultDiv = document.getElementById("result");
+
+        function showQuestion() {
+            quizDiv.innerHTML = "";
+            let q = questions[currentQuestion];
+            let div = document.createElement("div");
+            div.classList.add("question");
+            div.innerHTML = `<h3>${q.text}</h3>`;
+            
+            let optionsDiv = document.createElement("div");
+            optionsDiv.classList.add("options");
+            
+            let selectedButton = null;
+
+            for (const [key, value] of Object.entries(q.options)) {
+                let button = document.createElement("button");
+                button.innerText = key + ") " + value;
+                button.onclick = () => {
+                    if (selectedButton) {
+                        selectedButton.classList.remove("selected");
+                    }
+                    button.classList.add("selected");
+                    selectedButton = button;
+                    answers[currentQuestion] = key;
+                };
+                optionsDiv.appendChild(button);
+            }
+            
+            let confirmButton = document.createElement("button");
+            confirmButton.innerText = "Conferma";
+            confirmButton.style.backgroundColor = "#8c6239";
+            confirmButton.onclick = () => {
+                if (answers[currentQuestion]) {
+                    if (currentQuestion < questions.length - 1) {
+                        currentQuestion++;
+                        showQuestion();
+                    } else {
+                        calculateResult();
+                    }
+                }
+            };
+            
+            div.appendChild(optionsDiv);
+            div.appendChild(confirmButton);
+            quizDiv.appendChild(div);
+        }
+
+        function calculateResult() {
+            let counts = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
+            answers.forEach(a => { if (a) counts[a]++; });
+            let result = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            showResult(result);
+        }
+
+        function showResult(result) {
+            const resultMap = {
+                A: { name: "Cemani", img:"cemani.png", desc: "Sei un’anima indipendente e misteriosa, che non ama farsi troppo notare ma lascia comunque il segno. Hai un forte senso di sé e chi ti conosce sa che dietro il tuo fascino enigmatico si nasconde una grande lealtà e determinazione" },
+                B: { name: "Araucana", img: "araucana.jpg", desc: "La tua curiosità e la tua voglia di esplorare il mondo ti rendono una persona avventurosa e originale. Ti piace scoprire nuove prospettive e non hai paura di essere diverso dagli altri." },
+                C: { name: "Padovana", img: "padovana.jpg", desc: "Raffinato e con uno stile unico, ami esprimere la tua personalità con classe e creatività. Sei un vero punto di riferimento per chi cerca qualcuno di autentico e carismatico." },
+                D: { name: "Marans", img: "marans.jpg", desc: "Forte e sicuro di te, sei una guida naturale per gli altri. Ti piace affrontare la vita con fermezza e coraggio, senza mai perdere il senso della tua identità." },
+                E: { name: "Millefiori di Lonigo", img: "millefiori.jpg", desc: "Pieno di energia e passione, affronti la vita con entusiasmo e non ti fermi mai. Sei la scintilla che accende il divertimento e il dinamismo ovunque tu vada." },
+                F: { name: "Olandese Ciuffata Nana", img: "olandese.jpg", desc: "Socievole e carismatico, sai come conquistare chi ti circonda con la tua presenza elegante e il tuo spirito leggero. Sei sempre un compagno piacevole e apprezzato." }
+            };
+            quizDiv.style.display = "none";
+            resultDiv.style.display = "block";
+            document.getElementById("result-text").innerText = "Sei una " + resultMap[result].name + "!";
+            document.getElementById("result-image").src = resultMap[result].img;
+            document.getElementById("result-description").innerText = resultMap[result].desc;
+        }
+        
+        showQuestion();
+    </script>
+</body>
+</html>
